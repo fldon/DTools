@@ -1,10 +1,9 @@
-#If moving the project; change this variable to the root folder!
 PROJECT_ROOT:=$(shell dirname "$(realpath $(firstword $(MAKEFILE_LIST)))")
 CXXFLAGS = -fPIC -I$(PROJECT_ROOT)/include
 CFLAGS = -fPIC -I$(PROJECT_ROOT)/include
 
 #include .o files of every cpp file to be included in this line! that's it!
-objects=$(PROJECT_ROOT)/build/test.o
+objects=$(PROJECT_ROOT)/build/PriorityMutex.o
 testobjects=$(PROJECT_ROOT)/test/main.o $(PROJECT_ROOT)/test/tst_synchronizedValue.o
 
 all: lib test
@@ -20,6 +19,7 @@ clean:
 	rm -f build/*.o
 	rm -f lib/*
 	rm -f test/*.o
+	rm test/testmain
 
 $(testobjects): $(PROJECT_ROOT)/test/%.o: $(PROJECT_ROOT)/test/%.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@

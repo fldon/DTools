@@ -1,4 +1,4 @@
-﻿//TODO: Also make versions with priority mutexes; one with higher priority for the set calls and one with higher priority for the get calls
+﻿//TODO: Also make versions with shared priority mutexes; one with higher priority for the set calls and one with higher priority for the get calls
 
 #ifndef SYNCHRONIZEDVALUE_H
 #define SYNCHRONIZEDVALUE_H
@@ -15,10 +15,12 @@
 
 using namespace std::chrono_literals;
 
-namespace SynchonizedValue
+namespace dtools
 {
 
-enum SYNCHRONIZEDVALUEMODE {UPDATEINORDER = 0x1, PRIORITIZESET = 0x10, PRIORITIZEGET = 0x100};
+//enum SYNCHRONIZEDVALUEMODE {UPDATEINORDER = 0x1, PRIORITIZESET = 0x10, PRIORITIZEGET = 0x100};
+enum SYNCHRONIZEDVALUEMODE {UPDATEINORDER = 0x1};
+
 /*
  * /brief Wraps an object of type T that is either movable or copyable. Access to the wrapper is synchronized as follows:
  * get() can be called in parallel without blocking if the mode is UPDATEALWAYS and no calls to set happen at the same time.
@@ -58,10 +60,10 @@ private:
 
     std::atomic_uint setStartOrderIdx{1};
     std::atomic_uint setEndOrderIdx{0};
-    mutable std::shared_timed_mutex active_val_mut;
-    mutable std::mutex inputQueue_mut;
-    mutable std::mutex setAsync_mut;
-    mutable std::condition_variable setAsync_cond;
+    mutable std::shared_timed_mutex activeValMut;
+    mutable std::mutex inputQueueMut;
+    mutable std::mutex setAsyncOrderMut;
+    mutable std::condition_variable setAsyncCond;
 };
 
 template <typename T>
@@ -94,14 +96,15 @@ template <typename T> template <typename U>
 void SynchronizedValue<T>::setInternal(U&& val, unsigned int orderIdx)
 {
     static_assert(std::is_same<std::decay_t<U>,std::decay_t<T>>::value,
-            "SynchronizedValue::set: U must be the same as T");
+            "SynchronizedValue::setInternal: U must be the same as T");
     assert(!(setEndOrderIdx != orderIdx+1 && setEndOrderIdx > orderIdx) && "SynchronizedValue::setInternal: setEndOrderIdx is out of order for attempted set call");
 
     bool setComplete = false;
     do
     {
-        std::unique_lock<std::mutex> lk(setAsync_mut);
-        setAsync_cond.wait(lk, [this, orderIdx=orderIdx] () {return orderIdx == setEndOrderIdx + 1;});
+        std::unique_lock<std::mutex> lk(setAsyncOrderMut);
+        //Will only wait if another operation comes first in the order
+        setAsyncCond.wait(lk, [this, orderIdx=orderIdx] () {return orderIdx == setEndOrderIdx + 1;});
         if(orderIdx == setEndOrderIdx + 1)
         {
 
@@ -111,11 +114,12 @@ void SynchronizedValue<T>::setInternal(U&& val, unsigned int orderIdx)
             }
             else
             {
-                std::lock_guard<std::shared_timed_mutex> lk(active_val_mut);
+                std::lock_guard<std::shared_timed_mutex> lk(activeValMut);
                 active_val = std::forward<U>(val);
             }
             setEndOrderIdx++;
             setComplete = true;
+            setAsyncCond.notify_all();
         }
     } while(!setComplete);
 }
@@ -127,7 +131,7 @@ T SynchronizedValue<T>::get()
     {
         fill_active_val_from_queue();
     }
-    std::shared_lock<std::shared_timed_mutex> readlock(active_val_mut);
+    std::shared_lock<std::shared_timed_mutex> readlock(activeValMut);
     return active_val;
 }
 
@@ -143,7 +147,7 @@ void SynchronizedValue<T>::fill_value_queue(U&& val)
     static_assert(std::is_same<std::decay_t<U>,std::decay_t<T>>::value,
             "SynchronizedValue::fill_value_queue: U must be the same as T");
     {
-        std::lock_guard<std::mutex> lk(inputQueue_mut);
+        std::lock_guard<std::mutex> lk(inputQueueMut);
         outstanding_input_vals.push(std::forward<U>(val));
     }
 }
@@ -155,9 +159,9 @@ void SynchronizedValue<T>::fill_active_val_from_queue()
     {
         return;
     }
-    std::lock_guard<std::mutex> lkq(inputQueue_mut);
+    std::lock_guard<std::mutex> lkq(inputQueueMut);
     T &fillvalue = outstanding_input_vals.front();
-    std::lock_guard<std::shared_timed_mutex> lk(active_val_mut);
+    std::lock_guard<std::shared_timed_mutex> lk(activeValMut);
     active_val = fillvalue;
     outstanding_input_vals.pop();
 }

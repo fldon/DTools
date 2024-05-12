@@ -4,7 +4,7 @@
 #include "SynchronizedValue.h"
 
 using namespace testing;
-using namespace SynchonizedValue;
+using namespace dtools;
 
 TEST(SYNCHRONIZEDVALUE, CreateNewValueUpdateAlways)
 {
