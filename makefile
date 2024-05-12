@@ -19,7 +19,7 @@ clean:
 	rm -f build/*.o
 	rm -f lib/*
 	rm -f test/*.o
-	rm test/testmain
+	rm -f test/testmain
 
 $(testobjects): $(PROJECT_ROOT)/test/%.o: $(PROJECT_ROOT)/test/%.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
