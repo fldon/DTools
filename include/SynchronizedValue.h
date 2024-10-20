@@ -4,7 +4,6 @@
 #define SYNCHRONIZEDVALUE_H
 
 #include <queue>
-#include <array>
 #include <shared_mutex>
 #include <mutex>
 #include <atomic>
@@ -18,8 +17,8 @@ using namespace std::chrono_literals;
 namespace dtools
 {
 
-//enum SYNCHRONIZEDVALUEMODE {UPDATEINORDER = 0x1, PRIORITIZESET = 0x10, PRIORITIZEGET = 0x100};
-enum SYNCHRONIZEDVALUEMODE {UPDATEINORDER = 0x1};
+enum SYNCHRONIZEDVALUEMODE {UPDATEINORDER = 0x1, PRIORITIZESET = 0x10, PRIORITIZEGET = 0x100};
+//enum SYNCHRONIZEDVALUEMODE {UPDATEINORDER = 0x1};
 
 /*
  * /brief Wraps an object of type T that is either movable or copyable. Access to the wrapper is synchronized as follows:
@@ -28,6 +27,7 @@ enum SYNCHRONIZEDVALUEMODE {UPDATEINORDER = 0x1};
  * If the mode is UPDATEINORDER, the values set by set() are saved in a queue and get() returns them in the order they were set. If the queue is empty, the last set value is returned.
  * set and get have async versions that respect the order of calls and otherwise behave the same as their synchronous versions.
  * */
+//TODO maybe use bitset/bit field for bit flags instead of uint
 template <typename T>
 class SynchronizedValue
 {

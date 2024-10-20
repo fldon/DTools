@@ -33,7 +33,7 @@ private:
 
 class SharedPriorityMutex
 {
-    //TODO: create shared priority mutex. But how would that work? Same as normal priority mutex but with separate functions for lock_shared?
+    //TODO: create shared priority mutex for reader/writer situations. But how would that work? Same as normal priority mutex but with separate functions for lock_shared?
 };
 
 }
