@@ -7,7 +7,7 @@
 #ifndef MISCTOOLS_H
 #define MISCTOOLS_H
 
-namespace dtools
+namespace NS_dtools
 {
 
 constexpr inline unsigned long long floorlog2(unsigned long long x)

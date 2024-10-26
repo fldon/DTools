@@ -4,35 +4,35 @@
 #include "SynchronizedValue.h"
 
 using namespace testing;
-using namespace dtools;
+using namespace NS_dtools;
 
 TEST(SYNCHRONIZEDVALUE, CreateNewValueUpdateAlways)
 {
-    SynchronizedValue<int> val(5);
+    Synchronized_Value<int> val(5);
 }
 
 TEST(SYNCHRONIZEDVALUE, CreateNewValueUpdateInOrder)
 {
-    SynchronizedValue<int> val(5, UPDATEINORDER);
+    Synchronized_Value<int> val(5, UPDATEINORDER);
 }
 
 TEST(SYNCHRONIZEDVALUE, GetValueOfNewVal)
 {
-    SynchronizedValue<int> val(5);
+    Synchronized_Value<int> val(5);
     int i = val.get();
     ASSERT_EQ(i, 5);
 }
 
 TEST(SYNCHRONIZEDVALUE, GetValueOfNewValUpdateInOrder)
 {
-    SynchronizedValue<int> val(5, UPDATEINORDER);
+    Synchronized_Value<int> val(5, UPDATEINORDER);
     int i = val.get();
     ASSERT_EQ(i, 5);
 }
 
 TEST(SYNCHRONIZEDVALUE, BlockingUpdateAlwaysGetIsLastSetValue)
 {
-    SynchronizedValue<int> val(0);
+    Synchronized_Value<int> val(0);
     for(int i = 0; i < 200; ++i)
     {
         val.set(i);
@@ -42,7 +42,7 @@ TEST(SYNCHRONIZEDVALUE, BlockingUpdateAlwaysGetIsLastSetValue)
 
 TEST(SYNCHRONIZEDVALUE, BlockingUpdateInOrderGetIsNextSetValue)
 {
-    SynchronizedValue<int> val(0, UPDATEINORDER);
+    Synchronized_Value<int> val(0, UPDATEINORDER);
     for(int i = 0; i < 200; ++i)
     {
         val.set(i);

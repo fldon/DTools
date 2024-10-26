@@ -8,17 +8,17 @@
 #include <mutex>
 #include <atomic>
 #include <cassert>
-#include <chrono>
 #include <future>
-#include <thread>
+#include "PriorityMutex.h"
 
 using namespace std::chrono_literals;
 
-namespace dtools
+namespace NS_dtools
 {
 
-enum SYNCHRONIZEDVALUEMODE {UPDATEINORDER = 0x1, PRIORITIZESET = 0x10, PRIORITIZEGET = 0x100};
-//enum SYNCHRONIZEDVALUEMODE {UPDATEINORDER = 0x1};
+using namespace NS_concurrency::NS_priority_mutex;
+
+enum SYNCHRONIZEDVALUEMODE: int {UPDATEINORDER = 0x1, PRIORITIZESET = 0x10, PRIORITIZEGET = 0x100};
 
 /*
  * /brief Wraps an object of type T that is either movable or copyable. Access to the wrapper is synchronized as follows:
@@ -29,23 +29,25 @@ enum SYNCHRONIZEDVALUEMODE {UPDATEINORDER = 0x1, PRIORITIZESET = 0x10, PRIORITIZ
  * */
 //TODO maybe use bitset/bit field for bit flags instead of uint
 template <typename T>
-class SynchronizedValue
+class Synchronized_Value
 {
 public:
-    SynchronizedValue(T&& initval, unsigned int mode = 0x0);
+    Synchronized_Value(T&& initval, int mode = 0x0);
+    Synchronized_Value() = default;
+    ~Synchronized_Value() = default;
 
     template <typename U>
     void set(U&& val); //Is blocking
     template <typename U>
     void setAsync(U&& val);
 
-    T get(); //Is blocking
-    std::future<T> getAsync();
+   [[maybe_unused]] T get(); //Is blocking
+   [[maybe_unused]] std::future<T> getAsync();
 
-    SynchronizedValue& operator =(const SynchronizedValue&) = delete;
-    SynchronizedValue(const SynchronizedValue&) = delete;
-    SynchronizedValue& operator =(const SynchronizedValue&&) = delete;
-    SynchronizedValue(const SynchronizedValue&&) = delete;
+    Synchronized_Value& operator =(const Synchronized_Value&) = delete;
+    Synchronized_Value(const Synchronized_Value&) = delete;
+    Synchronized_Value& operator =(const Synchronized_Value&&) = delete;
+    Synchronized_Value(const Synchronized_Value&&) = delete;
 private:
     template <typename U>
     void setInternal(U&& val, unsigned int orderIdx);
@@ -56,26 +58,28 @@ private:
 
     std::queue<T> outstanding_input_vals;
     T active_val;
-    unsigned int mMode;
+    int mMode{0x0};
 
     std::atomic_uint setStartOrderIdx{1};
     std::atomic_uint setEndOrderIdx{0};
-    mutable std::shared_timed_mutex activeValMut;
+    mutable Biased_Shared_Priority_Mutex activeValMut;
     mutable std::mutex inputQueueMut;
     mutable std::mutex setAsyncOrderMut;
     mutable std::condition_variable setAsyncCond;
 };
 
 template <typename T>
-SynchronizedValue<T>::SynchronizedValue(T&& initval, unsigned int mode)
-:   mMode(mode),
-    active_val(std::forward<T>(initval))
+Synchronized_Value<T>::Synchronized_Value(T&& initval, int mode)
+:   active_val(std::forward<T>(initval)),
+    mMode(mode),
+    //Set the mode to either +1 (priority for setter) or -1 (priority for getter) or 0 if both or no flag is set in mode
+    activeValMut( (mode & SYNCHRONIZEDVALUEMODE::PRIORITIZESET / SYNCHRONIZEDVALUEMODE::PRIORITIZESET) - (mode & SYNCHRONIZEDVALUEMODE::PRIORITIZEGET / SYNCHRONIZEDVALUEMODE::PRIORITIZEGET) )
 {
 
 }
 
 template <typename T> template <typename U>
-void SynchronizedValue<T>::setAsync(U&& val)
+void Synchronized_Value<T>::setAsync(U&& val)
 {
     static_assert(std::is_same<std::decay_t<U>,std::decay_t<T>>::value,
             "SynchronizedValue::setAsync: U must be the same as T");
@@ -84,7 +88,7 @@ void SynchronizedValue<T>::setAsync(U&& val)
 }
 
 template <typename T> template <typename U>
-void SynchronizedValue<T>::set(U&& val)
+void Synchronized_Value<T>::set(U&& val)
 {
     static_assert(std::is_same<std::decay_t<U>,std::decay_t<T>>::value,
             "SynchronizedValue::set: U must be the same as T");
@@ -93,7 +97,7 @@ void SynchronizedValue<T>::set(U&& val)
 }
 
 template <typename T> template <typename U>
-void SynchronizedValue<T>::setInternal(U&& val, unsigned int orderIdx)
+void Synchronized_Value<T>::setInternal(U&& val, unsigned int orderIdx)
 {
     static_assert(std::is_same<std::decay_t<U>,std::decay_t<T>>::value,
             "SynchronizedValue::setInternal: U must be the same as T");
@@ -114,7 +118,7 @@ void SynchronizedValue<T>::setInternal(U&& val, unsigned int orderIdx)
             }
             else
             {
-                std::lock_guard<std::shared_timed_mutex> lk(activeValMut);
+                std::lock_guard<decltype(activeValMut)> lk(activeValMut);
                 active_val = std::forward<U>(val);
             }
             setEndOrderIdx++;
@@ -125,24 +129,24 @@ void SynchronizedValue<T>::setInternal(U&& val, unsigned int orderIdx)
 }
 
 template <typename T>
-T SynchronizedValue<T>::get()
+T Synchronized_Value<T>::get()
 {
     if((mMode & UPDATEINORDER) && !outstanding_input_vals.empty())
     {
         fill_active_val_from_queue();
     }
-    std::shared_lock<std::shared_timed_mutex> readlock(activeValMut);
+    std::shared_lock<decltype(activeValMut)> readlock(activeValMut);
     return active_val;
 }
 
 template <typename T>
-std::future<T> SynchronizedValue<T>::getAsync()
+std::future<T> Synchronized_Value<T>::getAsync()
 {
     return std::async(std::launch::async, get());
 }
 
 template <typename T> template <typename U>
-void SynchronizedValue<T>::fill_value_queue(U&& val)
+void Synchronized_Value<T>::fill_value_queue(U&& val)
 {
     static_assert(std::is_same<std::decay_t<U>,std::decay_t<T>>::value,
             "SynchronizedValue::fill_value_queue: U must be the same as T");
@@ -153,7 +157,7 @@ void SynchronizedValue<T>::fill_value_queue(U&& val)
 }
 
 template <typename T>
-void SynchronizedValue<T>::fill_active_val_from_queue()
+void Synchronized_Value<T>::fill_active_val_from_queue()
 {
     if(outstanding_input_vals.empty())
     {
@@ -161,7 +165,7 @@ void SynchronizedValue<T>::fill_active_val_from_queue()
     }
     std::lock_guard<std::mutex> lkq(inputQueueMut);
     T &fillvalue = outstanding_input_vals.front();
-    std::lock_guard<std::shared_timed_mutex> lk(activeValMut);
+    std::lock_guard<decltype(activeValMut)> lk(activeValMut);
     active_val = fillvalue;
     outstanding_input_vals.pop();
 }
