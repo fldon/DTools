@@ -1,5 +1,9 @@
-﻿StaticLibrary {
-    name: "DTools"
+﻿import qbs
+import qbs.Environment
+import qbs.FileInfo
+
+StaticLibrary {
+    name: "DTLib"
     Group
     {
         name: "Sourcefiles"
@@ -32,6 +36,6 @@
 
     Export {
         Depends { name: "cpp" }
-        cpp.includePaths: [exportingProduct.sourceDirectory, exportingProduct.includePaths]
+        cpp.includePaths: [exportingProduct.sourceDirectory, FileInfo.joinPaths(exportingProduct.sourceDirectory, "/include/"), FileInfo.joinPaths(exportingProduct.sourceDirectory, "/src/")]
     }
 }

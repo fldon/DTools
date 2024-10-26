@@ -46,5 +46,6 @@ CppApplication {
             "PriorityMutex.cpp"
         ]
     }
+    Depends {name: "DTLib"}
 
 }
