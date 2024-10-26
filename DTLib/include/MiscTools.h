@@ -3,11 +3,16 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <source_location>
+#include <stacktrace>
 
 #ifndef MISCTOOLS_H
 #define MISCTOOLS_H
 
 namespace NS_dtools
+{
+
+namespace NS_misc
 {
 
 constexpr inline unsigned long long floorlog2(unsigned long long x)
@@ -71,6 +76,46 @@ inline void process_mem_usage(double& vm_usage, double& resident_set)
     vm_usage     = vsize / 1024.0;
     resident_set = rss * page_size_kb;
 }
+
+
+class BaseOmegaException
+{
+public:
+    BaseOmegaException(std::string str, const std::source_location &loc =
+                                                std::source_location::current(), std::stacktrace trace = std::stacktrace::current())
+        :m_err_str{std::move(str)}, m_location(loc), m_backtrace{trace} {}
+
+    std::string& what() {return m_err_str;}
+    const std::string& what() const noexcept {return m_err_str;}
+    const std::source_location& where() const noexcept {return m_location;}
+    const std::stacktrace& stack() const noexcept {return m_backtrace;}
+
+private:
+    std::string m_err_str;
+    std::source_location m_location;
+    std::stacktrace m_backtrace;
+};
+
+/*!
+ * \brief OmegaException class as proposed by Peter Muldoon
+ * Can "carry" an arbitrary data object as well as a string. If it bubbles up, it prints a stacktrace.
+ */
+template<typename DATA_T>
+class OmegaException : public BaseOmegaException
+{
+public:
+    OmegaException(std::string str, DATA_T data, const std::source_location &loc =
+                                                 std::source_location::current(), std::stacktrace trace = std::stacktrace::current())
+        :BaseOmegaException(str, loc, trace), m_user_data{std::move(data)} {}
+
+    DATA_T& data() {return m_user_data;}
+    const DATA_T& data() const noexcept {return m_user_data;}
+private:
+    DATA_T m_user_data;
+};
+
+}
+
 
 } //dtools NS
 

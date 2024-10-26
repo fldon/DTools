@@ -38,5 +38,7 @@ StaticLibrary {
     Export {
         Depends { name: "cpp" }
         cpp.includePaths: [exportingProduct.sourceDirectory, FileInfo.joinPaths(exportingProduct.sourceDirectory, "/include/"), FileInfo.joinPaths(exportingProduct.sourceDirectory, "/src/")]
+        cpp.cxxLanguageVersion: ["c++23"]
     }
+    cpp.cxxLanguageVersion: ["c++23"]
 }
