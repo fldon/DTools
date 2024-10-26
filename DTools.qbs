@@ -3,7 +3,7 @@ Project
 {
     name: "DTools"
     references: [
-        "DTLib.qbs"
+        "DTLib/DTLib.qbs"
     ]
 
 

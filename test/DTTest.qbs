@@ -28,8 +28,8 @@ CppApplication {
             return tmp.concat([ "pthread" ]);
         }
     }
-    property string projectSourcePath: FileInfo.joinPaths(project.sourceDirectory, "/src/")
-property string projectIncludePath: FileInfo.joinPaths(project.sourceDirectory, "/include/")
+    property string projectSourcePath: FileInfo.joinPaths(project.sourceDirectory, "DTLib/src/")
+    property string projectIncludePath: FileInfo.joinPaths(project.sourceDirectory, "DTLib/include/")
     cpp.includePaths: [projectSourcePath, projectIncludePath].concat(googleCommon.getChildPath(qbs, googletestDir, "include"));
     cpp.libraryPaths: googleCommon.getChildPath(qbs, googletestDir, "lib")
 
