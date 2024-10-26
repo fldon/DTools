@@ -9,7 +9,8 @@ StaticLibrary {
         name: "Sourcefiles"
         prefix: "src/"
     files: [
-            "PriorityMutex.cpp"
+            "PriorityMutex.cpp",
+            "SharedPriorityMutex.cpp"
         ]
     }
 

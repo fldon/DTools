@@ -1,4 +1,4 @@
-﻿import qbs
+import qbs
 import qbs.Environment
 import qbs.FileInfo
 import "googlecommon.js" as googleCommon
@@ -43,7 +43,8 @@ CppApplication {
         name: "Sourcefiles"
         prefix: FileInfo.joinPaths(projectSourcePath)
     files: [
-            "PriorityMutex.cpp"
+            "SharedPriorityMutex.cpp",
+            "PriorityMutex.cpp",
         ]
     }
     Depends {name: "DTLib"}
