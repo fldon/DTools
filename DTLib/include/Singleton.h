@@ -1,7 +1,3 @@
-#include <atomic>
-#include <memory>
-
-
 #ifndef SINGLETON_H
 #define SINGLETON_H
 
@@ -18,6 +14,7 @@ public:
     [[nodiscard]] static T* get_object();
 
     Singleton() = default;
+    virtual ~Singleton() = default;
 
     Singleton(const Singleton& rhs) = delete;
     Singleton(Singleton&& rhs) = delete;

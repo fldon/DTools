@@ -1,6 +1,4 @@
-﻿//TODO: Also make versions with shared priority mutexes; one with higher priority for the set calls and one with higher priority for the get calls
-
-#ifndef SYNCHRONIZEDVALUE_H
+﻿#ifndef SYNCHRONIZEDVALUE_H
 #define SYNCHRONIZEDVALUE_H
 
 #include <queue>
