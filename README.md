@@ -1,7 +1,7 @@
 # DTools
-Misc tools
+Misc tools I mainly use in my other projects
 
-Build instructions:
+## Build instructions:
 
 Build using the top level DTools.qbs project file.
 
