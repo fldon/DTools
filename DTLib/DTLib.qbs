@@ -1,4 +1,4 @@
-﻿import qbs
+import qbs
 import qbs.Environment
 import qbs.FileInfo
 
@@ -22,7 +22,9 @@ StaticLibrary {
             "MiscTools.h",
             "PriorityMutex.h",
             "Singleton.h",
-            "SynchronizedValue.h"
+            "Synch_Stack.h",
+            "Synch_Value.h",
+            "synch_queue.h",
         ]
     }
 
