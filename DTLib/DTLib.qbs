@@ -2,7 +2,7 @@ import qbs
 import qbs.Environment
 import qbs.FileInfo
 
-StaticLibrary {
+DynamicLibrary {
     name: "DTLib"
     Group
     {
@@ -10,7 +10,8 @@ StaticLibrary {
         prefix: "src/"
     files: [
             "PriorityMutex.cpp",
-            "SharedPriorityMutex.cpp"
+            "SharedPriorityMutex.cpp",
+            "geometry/geometry.cpp"
         ]
     }
 
@@ -25,6 +26,7 @@ StaticLibrary {
             "Synch_Stack.h",
             "Synch_Value.h",
             "synch_queue.h",
+            "geometry/geometry.h"
         ]
     }
 

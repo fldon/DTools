@@ -43,6 +43,7 @@ CppApplication {
         name: "Sourcefiles"
         prefix: FileInfo.joinPaths(projectSourcePath)
     files: [
+            "geometry/geometry.cpp",
             "SharedPriorityMutex.cpp",
             "PriorityMutex.cpp",
         ]
