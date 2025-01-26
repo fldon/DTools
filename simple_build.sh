@@ -1,2 +1,2 @@
 #!/usr/bin/bash
-qbs install --install-root ./ qbs.installPrefix:
+qbs install --install-root ./ qbs.installPrefix: config:Release
