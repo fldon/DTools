@@ -1,3 +1,4 @@
+#THIS MAKEFILE IS DEPRECATED! USE qbs TO BUILD THE PROJECT INSTEAD!
 PROJECT_ROOT:=$(shell dirname "$(realpath $(firstword $(MAKEFILE_LIST)))")
 CXXFLAGS = -fPIC -I$(PROJECT_ROOT)/include
 CFLAGS = -fPIC -I$(PROJECT_ROOT)/include
