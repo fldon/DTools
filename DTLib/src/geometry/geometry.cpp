@@ -4,11 +4,6 @@ using namespace NS_dtools;
 using namespace NS_dtools::NS_geometry;
 
 /* SPHERE */
-Sphere::Sphere(const Point3 &center, double radius)
-    :m_radius(radius), m_center(center)
-{
-}
-
 std::vector< double > Sphere::intersect_ray(const Point3 &origin,
                                           const Vector3d &direction) const
 {
@@ -47,11 +42,6 @@ Vector3d Sphere::get_surface_normal_at(const Point3 &surface_point) const
 
 
 /* TRIANGLE */
-Triangle::Triangle(const Point3 &point1, const Point3 &point2, const Point3 &point3)
-    :m_p1(point1), m_p2(point2), m_p3(point3)
-{
-}
-
 std::vector< double > Triangle::intersect_ray(const Vector3d &origin,
                                               const Vector3d &direction) const
 {

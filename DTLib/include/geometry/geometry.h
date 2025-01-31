@@ -53,7 +53,7 @@ private:
 class Sphere : public iGeometryObject
 {
 public:
-    Sphere(const Point3 &center, double radius);
+    constexpr Sphere(const Point3 &center, double radius);
 
     [[nodiscard]] std::vector< double > intersect_ray(const Vector3d &origin,
                                                     const Vector3d &direction) const override;
@@ -65,11 +65,15 @@ private:
     Point3 m_center;
 };
 
+constexpr Sphere::Sphere(const Point3 &center, double radius)
+    :m_radius(radius), m_center(center)
+{
+}
 
 class Triangle: public iGeometryObject
 {
 public:
-    Triangle(const Point3 &point1, const Point3 &point2, const Point3 &point3);
+    constexpr Triangle(const Point3 &point1, const Point3 &point2, const Point3 &point3);
 
     [[nodiscard]] std::vector< double > intersect_ray(const Vector3d &origin,
                                                     const Vector3d &direction) const override;
@@ -81,6 +85,11 @@ private:
 
     Point3 m_p1, m_p2, m_p3;
 };
+
+constexpr Triangle::Triangle(const Point3 &point1, const Point3 &point2, const Point3 &point3)
+    :m_p1(point1), m_p2(point2), m_p3(point3)
+{
+}
 
 } //NS_geometry
 
