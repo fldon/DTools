@@ -25,8 +25,9 @@ StaticLibrary {
             "Singleton.h",
             "Synch_Stack.h",
             "Synch_Value.h",
+            "debug.h",
             "synch_queue.h",
-            "geometry/geometry.h"
+            "geometry/geometry.h",
         ]
     }
 
