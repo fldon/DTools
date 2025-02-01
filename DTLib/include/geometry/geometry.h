@@ -1,5 +1,6 @@
 #ifndef GEOMETRY_H
 #define GEOMETRY_H
+#include <DTools/debug.h>
 #include <eigen3/Eigen/Eigen>
 
 namespace NS_dtools
@@ -48,8 +49,6 @@ private:
 };
 
 
-
-
 class Sphere : public iGeometryObject
 {
 public:
@@ -70,6 +69,9 @@ constexpr Sphere::Sphere(const Point3 &center, double radius)
 {
 }
 
+/*!
+ * \brief Triangle class with three points that are always ordered COUNTER-CLOCKWISE (assuming right-handed coordinate system)
+ */
 class Triangle: public iGeometryObject
 {
 public:
@@ -89,6 +91,20 @@ private:
 constexpr Triangle::Triangle(const Point3 &point1, const Point3 &point2, const Point3 &point3)
     :m_p1(point1), m_p2(point2), m_p3(point3)
 {
+    using std::swap;
+
+    //TODO: also check that the three points actually form a plane, otherwise throw exception
+
+    //make sure that the three points are ordered counter-clockwise in respect to the z axis
+    Vector3d vec_AB = m_p2 - m_p1;
+    Vector3d vec_AC = m_p3 - m_p1;
+
+    //if normal has negative z, flip points 2 and 3
+    if(vec_AB.cross(vec_AC)(2) < 0)
+    {
+        swap(m_p2, m_p3);
+    }
+    debug_assert((m_p2 - m_p1).cross(m_p3 - m_p1)(2) >= 0);
 }
 
 } //NS_geometry
