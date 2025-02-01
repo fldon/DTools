@@ -2,7 +2,7 @@ import qbs
 import qbs.Environment
 import qbs.FileInfo
 
-DynamicLibrary {
+StaticLibrary {
     name: "DTLib"
     Group
     {
