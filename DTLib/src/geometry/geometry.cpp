@@ -178,15 +178,4 @@ std::vector< double > Triangle::intersect_ray(const Vector3d &origin,
     }
 
 }
-
-Vector3d Triangle::get_surface_normal_at(const Point3 &surface_point) const
-{
-    //There is only one surface normal, regardless of where we are (as long as we are in the triangle)
-    //TODO: check if surface_point is in the triangle. If not, throw OmegaException. If yes, return normal
-    //For checking, use the "inside-outside" technique for each of the three vertices (see scratchapixel)
-    const Vector3d vec_AB = m_p2 - m_p1;
-    const Vector3d vec_AC = m_p3 - m_p1;
-
-    return vec_AB.cross(vec_AC);
-}
 /* TRIANGLE */

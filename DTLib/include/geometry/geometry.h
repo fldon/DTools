@@ -80,7 +80,7 @@ public:
     [[nodiscard]] std::vector< double > intersect_ray(const Vector3d &origin,
                                                     const Vector3d &direction) const override;
 
-    [[nodiscard]] Vector3d get_surface_normal_at(const Point3 &surface_point) const override;
+    [[nodiscard]] constexpr Vector3d get_surface_normal_at(const Point3 &surface_point) const override;
 
 private:
     [[nodiscard]] std::optional<Point3> get_vector_intersection(const Vector3d &vec) const;
@@ -112,6 +112,18 @@ constexpr Triangle::Triangle(const Point3 &point1, const Point3 &point2, const P
         swap(m_p2, m_p3);
     }
     debug_assert((m_p2 - m_p1).cross(m_p3 - m_p1)(2) >= 0);
+}
+
+constexpr Vector3d Triangle::get_surface_normal_at(const Point3 &surface_point) const
+{
+    //There is only one surface normal, regardless of where we are (as long as we are in the triangle)
+    //TODO: check if surface_point is in the triangle. If not, throw OmegaException. If yes, return normal
+    //For checking, use the "inside-outside" technique for each of the three vertices (see scratchapixel)
+    //Additional to "inside_out" technique, should probably check if dist. of point to m_p1 projected onto triangle normal is < EPSILON (otherwise we are not in the plane!)
+    const Vector3d vec_AB = m_p2 - m_p1;
+    const Vector3d vec_AC = m_p3 - m_p1;
+
+    return vec_AB.cross(vec_AC);
 }
 
 } //NS_geometry
