@@ -75,7 +75,7 @@ constexpr Sphere::Sphere(const Point3 &center, double radius)
 class Triangle: public iGeometryObject
 {
 public:
-    constexpr Triangle(const Point3 &point1, const Point3 &point2, const Point3 &point3);
+    constexpr Triangle(const Point3 &point1, const Point3 &point2, const Point3 &point3, bool flip_from_right_handed = false);
 
     [[nodiscard]] std::vector< double > intersect_ray(const Vector3d &origin,
                                                     const Vector3d &direction) const override;
@@ -88,12 +88,19 @@ private:
     Point3 m_p1, m_p2, m_p3;
 };
 
-constexpr Triangle::Triangle(const Point3 &point1, const Point3 &point2, const Point3 &point3)
+constexpr Triangle::Triangle(const Point3 &point1, const Point3 &point2, const Point3 &point3, bool flip_from_right_handed)
     :m_p1(point1), m_p2(point2), m_p3(point3)
 {
     using std::swap;
-
     //TODO: also check that the three points actually form a plane, otherwise throw exception
+
+    //if transforming a right handed coord system triangle into this left handed one, flip the x-coords
+    if(flip_from_right_handed)
+    {
+        m_p1(0) = -m_p1(0);
+        m_p2(0) = -m_p2(0);
+        m_p3(0) = -m_p3(0);
+    }
 
     //make sure that the three points are ordered counter-clockwise in respect to the z axis
     Vector3d vec_AB = m_p2 - m_p1;
