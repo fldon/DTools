@@ -1,4 +1,5 @@
 #include "geometry/geometry.h"
+#include <DTools/MiscTools.h>
 
 using namespace NS_dtools;
 using namespace NS_dtools::NS_geometry;
@@ -35,7 +36,12 @@ std::vector< double > Sphere::intersect_ray(const Point3 &origin,
 
 Vector3d Sphere::get_surface_normal_at(const Point3 &surface_point) const
 {
-    //TODO: what to do if point is not actually on the surface? I can't check for equality with radius because floating_point shit
+    const Vector3d center2point = surface_point - m_center;
+    if(center2point.norm() < m_radius - EPSILON || center2point.norm() > m_radius + EPSILON)
+    {
+        throw NS_dtools::NS_misc::BaseOmegaException("Point is not on surface of sphere");
+    }
+
     return (surface_point - m_center).normalized();
 }
 /* SPHERE */
@@ -177,7 +183,7 @@ Vector3d Triangle::get_surface_normal_at(const Point3 &surface_point) const
 {
     //There is only one surface normal, regardless of where we are (as long as we are in the triangle)
     //TODO: check if surface_point is in the triangle. If not, throw OmegaException. If yes, return normal
-    //But we can't really check if a point is "in" the triangle... Maybe with an epsilon???
+    //For checking, use the "inside-outside" technique for each of the three vertices (see scratchapixel)
     const Vector3d vec_AB = m_p2 - m_p1;
     const Vector3d vec_AC = m_p3 - m_p1;
 

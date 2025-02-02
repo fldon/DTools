@@ -78,15 +78,14 @@ inline void process_mem_usage(double& vm_usage, double& resident_set)
 }
 
 
-class BaseOmegaException
+class BaseOmegaException : public std::exception
 {
 public:
     BaseOmegaException(std::string str, const std::source_location &loc =
                                                 std::source_location::current(), std::stacktrace trace = std::stacktrace::current())
         :m_err_str{std::move(str)}, m_location(loc), m_backtrace{trace} {}
 
-    std::string& what() {return m_err_str;}
-    const std::string& what() const noexcept {return m_err_str;}
+    const char* what() const noexcept override {return m_err_str.c_str();}
     const std::source_location& where() const noexcept {return m_location;}
     const std::stacktrace& stack() const noexcept {return m_backtrace;}
 
