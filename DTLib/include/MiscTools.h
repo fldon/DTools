@@ -28,7 +28,7 @@ constexpr inline unsigned long long floorlog2(unsigned long long x)
 
 constexpr inline unsigned long long ceillog2(unsigned long long x)
 {
-    unsigned long long result = x == 1 ? 0 : floorlog2(x - 1) + 1;
+    const unsigned long long result = x == 1 ? 0 : floorlog2(x - 1) + 1;
     return result;
 }
 
