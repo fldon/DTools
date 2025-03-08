@@ -1,7 +1,7 @@
 #include <gmock/gmock-matchers.h>
 #include <gtest/gtest.h>
 
-#include "Synch_Value.h"
+#include "concurrency/Synch_Value.h"
 
 using namespace testing;
 using namespace NS_dtools;

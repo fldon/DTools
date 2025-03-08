@@ -44,8 +44,8 @@ CppApplication {
         prefix: FileInfo.joinPaths(projectSourcePath)
     files: [
             "geometry/geometry.cpp",
-            "SharedPriorityMutex.cpp",
-            "PriorityMutex.cpp",
+            "concurrency/SharedPriorityMutex.cpp",
+            "concurrency/PriorityMutex.cpp",
         ]
     }
     Depends {name: "DTLib"}

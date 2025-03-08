@@ -9,8 +9,8 @@ StaticLibrary {
         name: "Sourcefiles"
         prefix: "src/"
     files: [
-            "PriorityMutex.cpp",
-            "SharedPriorityMutex.cpp",
+            "concurrency/PriorityMutex.cpp",
+            "concurrency/SharedPriorityMutex.cpp",
             "geometry/geometry.cpp"
         ]
     }
@@ -21,13 +21,14 @@ StaticLibrary {
         prefix: "include/"
     files: [
             "MiscTools.h",
-            "PriorityMutex.h",
+            "concurrency/PriorityMutex.h",
             "Singleton.h",
-            "Synch_Stack.h",
-            "Synch_Value.h",
+            "concurrency/Synch_Stack.h",
+            "concurrency/Synch_Value.h",
             "debug.h",
-            "synch_queue.h",
+            "concurrency/synch_queue.h",
             "geometry/geometry.h",
+            "concurrency/threadpool.h",
         ]
     }
 
