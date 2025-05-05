@@ -48,4 +48,9 @@ StaticLibrary {
         cpp.dynamicLibraries: ["stdc++exp"]
     }
     cpp.cxxLanguageVersion: ["c++23"]
+
+    Properties{
+        condition: qbs.buildVariant == "debug"
+        cpp.defines: ["DT_DEBUG"]
+    }
 }
