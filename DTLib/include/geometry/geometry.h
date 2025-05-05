@@ -21,7 +21,26 @@ constexpr double EPSILON = 0.0001; //std::numeric_limits<double>::epsilon();
 
 constexpr double EPSILON_T_MIN = EPSILON; //Minimal tiny t so that we do not cast shadows from our origin point itself
 
+/*GENERAL FUNCTIONS AND CONVERSIONS*/
 
+/*!
+ * \brief returns a vector/point in cartesian coords corresponding to the supplied spherical coords.
+ * Assumes that 0 < theta < pi and 0 < phi < 2 pi.
+ * Uses convention that "z is up" . Might have to convert the resulting vector if this differs
+ * \param radius
+ * \param theta
+ * \param phi
+ */
+constexpr Vector3d spherical_to_cartesian(double radius, double theta, double phi)
+{
+    const double x = radius * sin(theta) * cos(phi);
+    const double y = radius * sin(theta) * sin(phi);
+    const double z = radius * cos(theta);
+    return Vector3d{x,y,z};
+}
+
+
+/*INVIDIDUAL GEOMETRY OBJECTS*/
 class iGeometryObject
 {
 public:
@@ -70,17 +89,14 @@ constexpr Sphere::Sphere(const Point3 &center, double radius)
 }
 
 /*!
- * \brief Triangle class with three points that are always ordered COUNTER-CLOCKWISE (assuming right-handed coordinate system)
+ * \brief Triangle class with three points
  */
 class Triangle: public iGeometryObject
 {
 public:
-    enum class TR_WINDING {RIGHTHAND_CCW, LEFTHAND_CW};
-
     constexpr Triangle(const Point3 &point1,
                        const Point3 &point2,
                        const Point3 &point3,
-                       TR_WINDING winding,
                        bool flip_from_mirror_coord_system = false);
 
     [[nodiscard]] std::vector< double > intersect_ray(const Vector3d &origin,
@@ -92,23 +108,17 @@ public:
 
     [[nodiscard]] constexpr bool is_point_in_triangle(const Point3 &point) const;
 
-    //Did p2 and p3 have to be swapped from their order in the ctor to fulfill the winding requirement?
-    [[nodiscard]] constexpr bool get_p2_p3_were_swapped() const noexcept {return had_to_swap_p2_p3_for_winding;}
-
 private:
     [[nodiscard]] std::optional<Point3> get_vector_intersection(const Vector3d &vec) const;
 
     Point3 m_p1, m_p2, m_p3;
-    TR_WINDING m_winding{TR_WINDING::RIGHTHAND_CCW};
-    bool had_to_swap_p2_p3_for_winding{false};
 };
 
 constexpr Triangle::Triangle(const Point3 &point1,
                              const Point3 &point2,
                              const Point3 &point3,
-                             TR_WINDING winding,
                              bool flip_from_mirror_coord_system)
-    :m_p1(point1), m_p2(point2), m_p3(point3), m_winding(winding)
+    :m_p1(point1), m_p2(point2), m_p3(point3)
 {
     using std::swap;
     //TODO: also check that the three points actually form a plane within Epsilon accuracy, otherwise throw exception
@@ -119,24 +129,10 @@ constexpr Triangle::Triangle(const Point3 &point1,
         m_p1(0) = -m_p1(0);
         m_p2(0) = -m_p2(0);
         m_p3(0) = -m_p3(0);
+
+        //according to scratchapixeL: also re-order the points to p3,p2,p1 instead of p1,p2,p2
+        swap(m_p1, m_p3);
     }
-
-    /*As a test: don't reorder, instead handle windedness completely when getting the normal
-     * This assumes that the windedness can be described completely by its effects on the normal direction*/
-    //make sure that the three points are ordered counter-clockwise in respect to the z axis
-    const Vector3d vec_AB = m_p2 - m_p1;
-    const Vector3d vec_AC = m_p3 - m_p1;
-
-    //if normal has negative z, flip points 2 and 3
-    //This makes all calculaitons less complicated, but is not ideal for the user of this class...
-    if(vec_AB.cross(vec_AC)(2) < 0)
-    {
-        had_to_swap_p2_p3_for_winding = true;
-        swap(m_p2, m_p3);
-
-    }
-    debug_assert((m_p2 - m_p1).cross(m_p3 - m_p1)(2) >= 0);
-
 }
 
 constexpr Vector3d Triangle::get_surface_normal_at(const Point3&) const
@@ -147,11 +143,7 @@ constexpr Vector3d Triangle::get_surface_normal_at(const Point3&) const
 
     const Vector3d surface_normal = vec_AB.cross(vec_AC);
 
-    debug_assert(surface_normal(2) >= 0);
-
-    const bool has_to_flip_z =  m_winding == TR_WINDING::LEFTHAND_CW;
-
-    return surface_normal * (has_to_flip_z? -1 : 1);
+    return surface_normal;
 }
 
 /*!
