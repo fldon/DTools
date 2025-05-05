@@ -68,9 +68,11 @@ private:
     std::condition_variable_any mCondV;
     std::shared_mutex mMut;
     std::mutex internal_admin_mutex; //used to manipulate internal queue and is_shared_lock even if shared lock is used
-    int lock_counter{0}; //How many clients lock the main mutex right now?
+    unsigned long lock_counter{0}; //How many clients lock the main mutex right now?
     bool is_shared_lock{false};
     std::priority_queue<int> lockPriorities;
+
+    static constexpr unsigned long MAX_NUM_LOCK_COUNTER = std::numeric_limits<unsigned long>::max();
 };
 
 

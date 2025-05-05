@@ -1,4 +1,5 @@
 #include "concurrency/PriorityMutex.h"
+#include "debug.h"
 
 using namespace NS_dtools;
 using namespace NS_concurrency::NS_priority_mutex;
@@ -21,7 +22,7 @@ void Priority_Mutex::lock(int prioritylvl)
 void Priority_Mutex::unlock()
 {
     std::lock_guard<decltype(mMut)> lk(mMut);
-    assert(!lockPriorities.empty() && "PriorityMutex::unlock: priority queue is empty!");
+    DEBUG_ASSERT(!lockPriorities.empty() && "PriorityMutex::unlock: priority queue is empty!");
     lockPriorities.pop();
     locked = false;
     mCondV.notify_all();

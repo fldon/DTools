@@ -1,4 +1,5 @@
 #include "concurrency/PriorityMutex.h"
+#include "debug.h"
 
 using namespace NS_dtools;
 using namespace NS_concurrency::NS_priority_mutex;
@@ -22,7 +23,7 @@ void Shared_Priority_Mutex::lock(int prioritylvl)
     }
 
     std::lock_guard<decltype(internal_admin_mutex)> queue_lk(internal_admin_mutex);
-    assert(lock_counter == 0);
+    DEBUG_ASSERT(lock_counter == 0);
     lock_counter++;
     is_shared_lock = false;
 }
@@ -33,10 +34,10 @@ void Shared_Priority_Mutex::unlock()
     //Pop from list must be synchronized even if main Mutex lock is shared
     std::lock_guard<decltype(internal_admin_mutex)> queue_lk(internal_admin_mutex);
 
-    assert(!lockPriorities.empty() && "PriorityMutex::unlock: priority queue is empty!");
+    DEBUG_ASSERT(!lockPriorities.empty() && "PriorityMutex::unlock: priority queue is empty!");
     lockPriorities.pop();
     lock_counter--;
-    assert(lock_counter == 0);
+    DEBUG_ASSERT(lock_counter == 0);
     is_shared_lock = false;
     mCondV.notify_all();
 }
@@ -55,7 +56,9 @@ void Shared_Priority_Mutex::lock_shared(int prioritylvl)
     {
         mCondV.wait(lk, [&]{
             std::lock_guard<decltype(internal_admin_mutex)> queue_lk(internal_admin_mutex);
-            return (lock_counter == 0 || is_shared_lock) && (lockPriorities.top() == prioritylvl);
+            return (lock_counter == 0 || is_shared_lock)
+                   && (lockPriorities.top() == prioritylvl)
+                   && (lock_counter < MAX_NUM_LOCK_COUNTER); //Do not acquire lock if we are at numeric limit
         });
     }
 
@@ -70,10 +73,10 @@ void Shared_Priority_Mutex::unlock_shared()
     std::shared_lock<decltype(mMut)> lk(mMut);
     //Pop from list must be synchronized even if main Mutex lock is shared
     std::lock_guard<decltype(internal_admin_mutex)> queue_lk(internal_admin_mutex);
-    assert(!lockPriorities.empty() && "PriorityMutex::unlock: priority queue is empty!");
+    DEBUG_ASSERT(!lockPriorities.empty() && "PriorityMutex::unlock: priority queue is empty!");
     lockPriorities.pop();
     lock_counter--;
-    assert(lock_counter >= 0);
+    DEBUG_ASSERT(is_shared_lock);
     if(lock_counter == 0)
     {
         is_shared_lock = false;
