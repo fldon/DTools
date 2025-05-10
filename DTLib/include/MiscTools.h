@@ -118,7 +118,7 @@ private:
 
 //Generic clamping of addition/multiplication
 //TODO: maybe find a more generic way to do this...
-[[nodiscard]] constexpr double add_clamp(double lhs, double rhs, double min_val, double max_val)
+[[nodiscard]] constexpr double add_clamp_d(double lhs, double rhs, double min_val, double max_val)
 {
     //For doubles this should work because there is no overrun, only INF and - INF
     const double result = lhs + rhs;
@@ -128,7 +128,7 @@ private:
     return result;
 }
 
-[[nodiscard]] constexpr double mult_clamp(double lhs, double rhs, double min_val, double max_val)
+[[nodiscard]] constexpr double mult_clamp_d(double lhs, double rhs, double min_val, double max_val)
 {
     //For doubles this should work because there is no overrun, only INF and - INF
     const double result = lhs * rhs;
@@ -139,22 +139,22 @@ private:
 }
 
 //"wrapping" of added values (back to max if under min and vice versa)
-[[nodiscard]] constexpr double add_wrap(double lhs, double rhs, double min_val, double max_val)
+[[nodiscard]] constexpr double add_wrap_d(double lhs, double rhs, double min_val, double max_val)
 {
     //For doubles this should work because there is no overrun, only INF and - INF
     const double result = lhs + rhs;
-    if(result > max_val) return add_wrap(result - max_val, min_val, min_val, max_val);
-    if(result < min_val) return add_wrap(result - min_val, max_val, min_val, max_val);
+    if(result > max_val) return add_wrap_d(result - max_val, min_val, min_val, max_val);
+    if(result < min_val) return add_wrap_d(result - min_val, max_val, min_val, max_val);
     DEBUG_ASSERT(result <= max_val && result >= min_val);
     return result;
 }
 
-[[nodiscard]] constexpr double mult_wrap(double lhs, double rhs, double min_val, double max_val)
+[[nodiscard]] constexpr double mult_wrap_d(double lhs, double rhs, double min_val, double max_val)
 {
     //For doubles this should work because there is no overrun, only INF and - INF
     const double result = lhs * rhs;
-    if(result > max_val) return mult_wrap(result - max_val, min_val, min_val, max_val);
-    if(result < min_val) return mult_wrap(result - min_val, max_val, min_val, max_val);
+    if(result > max_val) return mult_wrap_d(result - max_val, min_val, min_val, max_val);
+    if(result < min_val) return mult_wrap_d(result - min_val, max_val, min_val, max_val);
     DEBUG_ASSERT(result <= max_val && result >= min_val);
     return result;
 }
