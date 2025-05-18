@@ -1,6 +1,7 @@
 #ifndef GEOMETRY_H
 #define GEOMETRY_H
 #include <DTools/debug.h>
+#include <DTools/MiscTools.h>
 #include <eigen3/Eigen/Eigen>
 
 namespace NS_dtools
@@ -201,11 +202,17 @@ constexpr std::optional< std::tuple<double, double, double> >  Triangle::get_bar
     v /= denominator_uvw;
     w /= denominator_uvw;
 
-    if(not (std::abs(1 - u - v - w) < EPSILON) )
+    if(not (std::abs(1 - u - v - w) < EPSILON && u > -EPSILON && v > -EPSILON && w > -EPSILON ) ) //u,v,w must be >= 0 each and total sum must be 1
     {
         debug_stop();
         return {};
     }
+
+    //Boundary check: clamp u,v,w?
+
+    u = NS_misc::clamp_d(u,0,1);
+    v = NS_misc::clamp_d(v,0,1);
+    w = NS_misc::clamp_d(w,0,1);
 
     return std::make_tuple(u,v,w);
 }

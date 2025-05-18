@@ -115,6 +115,12 @@ private:
     DATA_T m_user_data;
 };
 
+[[nodiscard]] constexpr double clamp_d(double value, double min_val, double max_val)
+{
+    if(value > max_val) return max_val;
+    if(value < min_val) return min_val;
+    return value;
+}
 
 //Generic clamping of addition/multiplication
 //TODO: maybe find a more generic way to do this...
