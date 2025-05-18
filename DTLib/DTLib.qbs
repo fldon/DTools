@@ -9,9 +9,10 @@ StaticLibrary {
         name: "Sourcefiles"
         prefix: "src/"
     files: [
+            "../include/concurrency/Thread_Pool.cpp",
             "concurrency/PriorityMutex.cpp",
             "concurrency/SharedPriorityMutex.cpp",
-            "geometry/geometry.cpp"
+            "geometry/geometry.cpp",
         ]
     }
 
@@ -21,14 +22,15 @@ StaticLibrary {
         prefix: "include/"
     files: [
             "MiscTools.h",
+            "concurrency/Misc_Conc.h",
             "concurrency/PriorityMutex.h",
             "Singleton.h",
             "concurrency/Synch_Stack.h",
             "concurrency/Synch_Value.h",
+            "concurrency/Thread_Pool.h",
             "debug.h",
             "concurrency/synch_queue.h",
             "geometry/geometry.h",
-            "concurrency/threadpool.h",
         ]
     }
 
