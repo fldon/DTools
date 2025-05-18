@@ -21,6 +21,8 @@ namespace NS_concurrency
  *
  *TODO: I suppose in the long run, I should re-implement this from scratch. The boost thread pool is too limiting in its API
  *Perhaps there IS no way to implement a wait_for_empty_task_queue, that does not destroy the performance?
+ *Is this usecase (waiting for current tasks without completely joining pool) even sensible?
+ *Or is that soemthing that should be handled using barriers instead?
  * */
 
 class Thread_Pool final
@@ -42,27 +44,27 @@ public:
 template<typename Functor, typename... argtypes>
     void post_free(Functor&& f, argtypes&&... args)
     {
-    std::lock_guard<std::mutex> guard(m_curr_task_update_mut);
-    if(not (m_current_tasks < std::numeric_limits<unsigned long long>::max() - 1) )
-    {
-        throw NS_dtools::NS_misc::OmegaException<unsigned long long>("Task limit reached: ", m_current_tasks);
-    }
-    ++m_current_tasks;
-
-    auto bound_functor = std::bind(std::forward<Functor>(f), std::forward<argtypes>(args)...);
-    auto task_wrapper = [this, bound_functor=std::move(bound_functor)]() -> void
-    {
-        bound_functor();
         std::lock_guard<std::mutex> guard(m_curr_task_update_mut);
-
-        if(m_current_tasks == 0)
+        if(not (m_current_tasks < std::numeric_limits<unsigned long long>::max() - 1) )
         {
-            throw NS_dtools::NS_misc::BaseOmegaException("Internal Error: m_current_tasks is 0 at decrement!");
+            throw NS_dtools::NS_misc::OmegaException<unsigned long long>("Task limit reached: ", m_current_tasks);
         }
+        ++m_current_tasks;
 
-        --m_current_tasks;
-        m_tasks_done_cv.notify_all();
-    };
+        auto bound_functor = std::bind(std::forward<Functor>(f), std::forward<argtypes>(args)...);
+        auto task_wrapper = [this, bound_functor=std::move(bound_functor)]() -> void
+        {
+            bound_functor();
+            std::lock_guard<std::mutex> guard(m_curr_task_update_mut);
+
+            if(m_current_tasks == 0)
+            {
+                throw NS_dtools::NS_misc::BaseOmegaException("Internal Error: m_current_tasks is 0 at decrement!");
+            }
+
+            --m_current_tasks;
+            m_tasks_done_cv.notify_all();
+        };
 
 
         boost::asio::post(m_pool, task_wrapper );
