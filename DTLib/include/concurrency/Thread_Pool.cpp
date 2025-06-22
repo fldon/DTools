@@ -27,7 +27,7 @@ void Thread_Pool::join()
     m_pool.join();
 }
 
-void Thread_Pool::wait_for_tasks_done()
+void Thread_Pool::wait_for_tasks_done() const
 {
     std::unique_lock<std::mutex> lock(m_curr_task_update_mut);
     m_tasks_done_cv.wait(lock, [this](){return m_current_tasks == 0;});

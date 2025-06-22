@@ -21,6 +21,7 @@ namespace NS_concurrency
  *
  *TODO: I suppose in the long run, I should re-implement this from scratch. The boost thread pool is too limiting in its API
  *Perhaps there IS no way to implement a wait_for_empty_task_queue, that does not destroy the performance?
+ *Because in the end, I have to SOMEHOW get the shared state of the whole pool.
  *Is this usecase (waiting for current tasks without completely joining pool) even sensible?
  *Or is that soemthing that should be handled using barriers instead?
  * */
@@ -38,6 +39,8 @@ public:
 
 /*!
  * \brief Post a function to the pool without getting a return future
+ * Synchronizes-with the thread starting the task.
+ * All sequential operations before the post() have a happens-before relationship with the posted task.
  * \param f: Functor
  * \param args: Functor arguments
  */
@@ -72,6 +75,8 @@ template<typename Functor, typename... argtypes>
 
 /*!
  * \brief Post a functor to the pool.
+ *  Synchronizes-with the thread starting the task.
+ *  All sequential operations before the post() have a happens-before relationship with the posted task.
  * \param f: Functor
  * \param args: Functor arguments
  * \return Returns future with return value.
@@ -125,7 +130,7 @@ void join();
  * \brief Waits until there are no more tasks on the queue.
  * Does not stop execution and does not join.
  */
-void wait_for_tasks_done();
+void wait_for_tasks_done() const;
 
 /*!
  * \brief Adds the currently executing thread to the thread pool
@@ -136,7 +141,7 @@ void attach_current_thread();
  * \brief Attaches the specified number of threads to the pool
  * \param num_threads
  */
-void attach_threads(uint num_threads);
+[[gnu::error("Not currently supported")]] void attach_threads(uint num_threads);
 
 
 /*!
@@ -144,15 +149,15 @@ void attach_threads(uint num_threads);
  * Currently not supported!
  * \param num_threads
  */
-void detach_threads(uint num_threads);
+[[gnu::error("Not currently supported")]] void detach_threads(uint num_threads);
 
 private:
     boost::asio::thread_pool m_pool;
     unsigned long long m_thread_count;
 
 
-    std::mutex m_curr_task_update_mut;
-    std::condition_variable m_tasks_done_cv;
+    mutable std::mutex m_curr_task_update_mut;
+    mutable std::condition_variable m_tasks_done_cv;
     unsigned long long m_current_tasks{0};
 };
 
