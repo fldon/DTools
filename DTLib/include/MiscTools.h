@@ -1,8 +1,11 @@
-﻿#include <unistd.h>
+﻿#include <cmath>
+#include <map>
+#include <unistd.h>
 #include <ios>
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 #include <source_location>
 #include <stacktrace>
 
@@ -162,6 +165,99 @@ private:
     if(result > max_val) return mult_wrap_d(result - max_val, min_val, min_val, max_val);
     if(result < min_val) return mult_wrap_d(result - min_val, max_val, min_val, max_val);
     DEBUG_ASSERT(result <= max_val && result >= min_val);
+    return result;
+}
+
+
+//Interpolate any function as Dependend = func(Independend) with given stepsize
+//returns pairs of datapoints in the form <Dependend, Independend>
+template<typename Independend, typename Dependend, typename Functor>
+[[nodiscard]] constexpr std::vector<std::pair<Independend, Dependend>> interpolate(Independend t0, Independend t1,
+                                                                                   Independend stepsize, Functor func)
+{
+    using std::swap;
+    //Make sure t0 is < t1 for simplicity
+    //TODO: maybe this adds too many constraints on the types
+    if(std::signbit(stepsize) != std::signbit(t1 - t0))
+    {
+        throw BaseOmegaException("stepsize has different sign than difference of range");
+    }
+
+    std::vector<std::pair<Independend, Dependend>> result;
+    for(Independend step = t0; std::abs(step - t0) <= std::abs(t1 - t0); step = step + stepsize)
+    {
+        const std::pair<Independend, Dependend> datapoint = std::make_pair(step, func(step));
+        result.push_back(datapoint);
+    }
+    return result;
+}
+
+//Returns pairs of <independend, dependend> of a line from i_0,d_0 to i_1,d_1 in stepsize steps
+[[nodiscard]] constexpr std::vector< std::pair<double, double> > interpolate_line_d_d(double independend_0, double independend_1,
+                                                                                        double dependend_0, double dependend_1,
+                                                                                        double stepsize)
+{
+    std::vector< std::pair<double, double> > result;
+
+    if(std::signbit(stepsize) != std::signbit(independend_1 - independend_0))
+    {
+        throw BaseOmegaException("stepsize has different sign than difference of range");
+    }
+
+    if(stepsize == 0)
+    {
+        throw BaseOmegaException("stepsize is 0");
+    }
+
+    if(std::abs(independend_1 - independend_0) < std::abs(stepsize))
+    {
+        result.push_back(std::make_pair(independend_0, dependend_0));
+        return result;
+    }
+
+    const double slope = (dependend_1 - dependend_0) / (independend_1 - independend_0);
+
+    double curr_dependend = dependend_0;
+    for(double step = independend_0; std::abs(step - independend_0) <= std::abs(independend_1 - independend_0); step += stepsize )
+    {
+        result.emplace_back(std::make_pair(step, curr_dependend));
+        curr_dependend += slope * stepsize;
+    }
+    return result;
+}
+
+//Returns pairs of <independend, dependend> of a line from i_0,d_0 to i_1,d_1 in stepsize steps
+//independend is int
+[[nodiscard]] constexpr std::map<int, double>  interpolate_line_i_d(int independend_0, int independend_1,
+                                                                                    double dependend_0, double dependend_1,
+                                                                                    int stepsize = 1)
+{
+    std::map<int, double> result;
+
+    if(std::signbit(stepsize) != std::signbit(independend_1 - independend_0))
+    {
+        throw BaseOmegaException("stepsize has different sign than difference of range");
+    }
+
+    if(stepsize == 0)
+    {
+        throw BaseOmegaException("stepsize is 0");
+    }
+
+    if(std::abs(independend_1 - independend_0) < std::abs(stepsize))
+    {
+        result.insert(std::make_pair(independend_0, dependend_0));
+        return result;
+    }
+
+    const double slope = (dependend_1 - dependend_0) / (independend_1 - independend_0);
+
+    double curr_dependend = dependend_0;
+    for(int step = independend_0; std::abs(step - independend_0) <= std::abs(independend_1 - independend_0); step += stepsize )
+    {
+        result.insert(std::make_pair(step, curr_dependend));
+        curr_dependend += slope * stepsize;
+    }
     return result;
 }
 
