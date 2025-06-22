@@ -80,6 +80,11 @@ public:
 
     [[nodiscard]] Vector3d get_surface_normal_at(const Point3 &surface_point) const override;
 
+    [[nodiscard]] double get_radius() const;
+    void set_radius(double radius);
+
+    [[nodiscard]] const Point3& get_center() const;
+    void set_center(const Point3 &center);
 private:
     double m_radius;
     Point3 m_center;

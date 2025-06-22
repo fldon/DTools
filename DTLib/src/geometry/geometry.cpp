@@ -44,6 +44,30 @@ Vector3d Sphere::get_surface_normal_at(const Point3 &surface_point) const
 
     return (surface_point - m_center).normalized();
 }
+
+void Sphere::set_radius(double radius)
+{
+    if(radius < EPSILON)
+    {
+        throw NS_dtools::NS_misc::BaseOmegaException("Radius is negative!");
+    }
+    m_radius = radius;
+}
+
+double Sphere::get_radius() const
+{
+    return m_radius;
+}
+
+void Sphere::set_center(const Point3 &center)
+{
+    m_center = center;
+}
+
+const Point3& Sphere::get_center() const
+{
+    return m_center;
+}
 /* SPHERE */
 
 
