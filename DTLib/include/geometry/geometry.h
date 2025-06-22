@@ -15,7 +15,8 @@ using Eigen::Vector3d;
 using Eigen::Matrix2i;
 using Eigen::Vector2i;
 
-using Point2 = Eigen::Vector2i;
+//TODO: Point2 should be renamed to Point2i, this is too specific!
+using Point2i = Eigen::Vector2i;
 using Point3 = Eigen::Vector3d;
 
 constexpr double EPSILON = 0.0001; //std::numeric_limits<double>::epsilon();
